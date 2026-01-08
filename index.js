@@ -1,16 +1,18 @@
 const express = require("express");
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
+const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const qrcode = require("qrcode-terminal");
 
 const app = express();
-const PORT = process.env.PORT;
+
+// 🔴 CORREÇÃO AQUI
+const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.send("Atlas Finance online 🚀");
 });
 
 app.listen(PORT, () => {
-  console.log("🌐 Servidor ativo na porta", PORT);
+  console.log("🌐 Servidor HTTP ativo na porta", PORT);
 });
 
 async function iniciarBot() {
@@ -25,21 +27,15 @@ async function iniciarBot() {
   sock.ev.on("creds.update", saveCreds);
 
   sock.ev.on("connection.update", (update) => {
-    const { connection, qr, lastDisconnect } = update;
+    const { connection, qr } = update;
 
     if (qr) {
-      console.log("📲 QR CODE GERADO — ESCANEIE:");
+      console.log("📲 ESCANEIE O QR CODE:");
       qrcode.generate(qr, { small: true });
     }
 
     if (connection === "open") {
       console.log("✅ Atlas Finance conectado com sucesso!");
-    }
-
-    if (connection === "close") {
-      const reason = lastDisconnect?.error?.output?.statusCode;
-      console.log("⚠️ Conexão fechada. Motivo:", reason);
-      iniciarBot(); // reconecta automaticamente
     }
   });
 }
